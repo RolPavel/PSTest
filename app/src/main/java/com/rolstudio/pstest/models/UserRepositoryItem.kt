@@ -2,8 +2,7 @@ package com.rolstudio.pstest.models
 
 data class UserRepositoryItem(
     val id: Int,
-    val name: String,
-    val forks_count: Int,
+    val full_name: String,
     val description: String?,
-    val html_url: String
+    val forks_count: Int
 )

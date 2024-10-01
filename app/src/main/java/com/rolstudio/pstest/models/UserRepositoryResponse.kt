@@ -1,3 +1,5 @@
 package com.rolstudio.pstest.models
 
-class UserRepositoryResponse : ArrayList<UserRepositoryItem>()
+class UserRepositoryResponse(
+    val items: List<UserRepositoryItem>
+)

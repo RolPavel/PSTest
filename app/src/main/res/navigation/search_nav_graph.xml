@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/search_nav_graph"
+    app:startDestination="@id/searchFragment2">
+
+     <fragment
+        android:id="@+id/searchFragment2"
+        android:name="com.rolstudio.pstest.ui.fragments.SearchFragment"
+        android:label="SearchFragment" >
+         <action
+             android:id="@+id/action_searchFragment2_to_repListFragment"
+             app:destination="@id/repListFragment" />
+     </fragment>
+
+    <fragment
+        android:id="@+id/repListFragment"
+        android:name="com.rolstudio.pstest.ui.fragments.RepListFragment"
+        android:label="RepListFragment" >
+        <argument
+            android:name="username"
+            app:argType="string" />
+    </fragment>
+</navigation>
