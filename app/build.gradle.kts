@@ -33,6 +33,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures{
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -62,7 +65,4 @@ dependencies {
     implementation ("androidx.navigation:navigation-ui-ktx:2.8.1")
     // Glide
     implementation ("com.github.bumptech.glide:glide:4.16.0")
-    // Dagger
-    implementation("com.google.dagger:dagger:2.52")
-    annotationProcessor("com.google.dagger:dagger-compiler:2.52")
 }
