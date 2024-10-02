@@ -20,7 +20,6 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/repCountBranches"
-        app:layout_constraintLeft_toRightOf="@+id/repStars"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
