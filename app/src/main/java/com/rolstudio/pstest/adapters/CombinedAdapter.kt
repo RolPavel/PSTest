@@ -15,9 +15,9 @@ import com.rolstudio.pstest.util.CombinedItem
 class CombinedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var userImage: ImageView = itemView.findViewById(R.id.userImage)
-        var userName: TextView = itemView.findViewById(R.id.userName)
-        var userScore: TextView = itemView.findViewById(R.id.userScore)
+        var userImage: ImageView = itemView.findViewById(R.id.contentIcon)
+        var userName: TextView = itemView.findViewById(R.id.contentName)
+        var userScore: TextView = itemView.findViewById(R.id.contentType)
     }
 
     inner class RepositoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,7 +30,7 @@ class CombinedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         override fun areItemsTheSame(oldItem: CombinedItem, newItem: CombinedItem): Boolean {
             return when {
                 oldItem is CombinedItem.User && newItem is CombinedItem.User -> oldItem.item.login == newItem.item.login
-                oldItem is CombinedItem.Repository && newItem is CombinedItem.Repository -> oldItem.item.full_name == newItem.item.full_name
+                oldItem is CombinedItem.Repository && newItem is CombinedItem.Repository -> oldItem.item.name == newItem.item.name
                 else -> false
             }
         }
@@ -80,20 +80,20 @@ class CombinedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 holder.userScore.text = user.score.toString()
                 holder.itemView.setOnClickListener {
                     onItemClickListener?.let { click ->
-                        click(userItem) // Передаем элемент
+                        click(userItem)
                     }
                 }
             }
             is RepositoryViewHolder -> {
                 val repoItem = differ.currentList[position] as CombinedItem.Repository
                 val repo = repoItem.item
-                holder.repoName.text = repo.full_name
+                holder.repoName.text = repo.name
                 holder.repoDescription.text = repo.description
                     ?: "No Description" // Обработайте возможность отсутствия описания
                 holder.repoCountBranches.text = repo.forks_count.toString()
                 holder.itemView.setOnClickListener {
                     onItemClickListener?.let { click ->
-                        click(repoItem) // Передаем элемент
+                        click(repoItem)
                     }
                 }
             }
@@ -103,6 +103,3 @@ class CombinedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         differ.submitList(list)
     }
 }
-
-
-

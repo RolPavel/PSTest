@@ -1,6 +1,8 @@
 package com.rolstudio.pstest.repository
 
+import android.util.Log
 import com.rolstudio.pstest.api.RetrofitInstance
+import com.rolstudio.pstest.models.RepositoryContentItems
 import com.rolstudio.pstest.models.SearchItem
 import com.rolstudio.pstest.models.SearchResponse
 import com.rolstudio.pstest.models.UserRepositoryItem
@@ -35,5 +37,14 @@ class SearchRepository {
         } else {
             return Result.failure(Exception("Failed to fetch users"))
         }
+    }
+
+    suspend fun getRepositoryContents(
+        owner: String,
+        repo: String,
+        path: String?
+    ): Response<List<RepositoryContentItems>> {
+        Log.d("SearchRepository", "Fetching contents for owner: $owner, repo: $repo, path: $path")
+        return RetrofitInstance.api.getRepositoryContents(owner, repo, path)
     }
 }

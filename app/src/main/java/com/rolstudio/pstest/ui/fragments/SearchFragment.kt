@@ -39,47 +39,19 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         binding.searchButton.setOnClickListener {
             val query = binding.searchEdit.query.toString().trim()
             if (query.length > 3) {
-                // Отменяем предыдущий запрос, если он ещё выполняется
                 job?.cancel()
-
-                // Запускаем новый запрос в корутине
                 job = MainScope().launch {
                     delay(SEARCH_USERS_DELAY)
-                    binding.searchEdit.isEnabled = false // Отключаем поле поиска во время выполнения
+                    binding.searchEdit.isEnabled =
+                        false
                     mainViewModel.searchUsersAndRepositories(query)
                 }
             } else {
                 combinedAdapter.submitList(emptyList())
             }
         }
-
-        // Наблюдаем за результатами поиска
         mainViewModel.searchUsers.observe(viewLifecycleOwner) { response ->
             handleUserSearchResponse(response)
-        }
-    }
-
-
-    private fun setupRecyclerView() {
-        combinedAdapter = CombinedAdapter()
-        binding.recyclerSearch.apply {
-            adapter = combinedAdapter
-            layoutManager = LinearLayoutManager(activity)
-        }
-
-        combinedAdapter.setOnItemClickListener { item ->
-            when (item) {
-                is CombinedItem.User -> {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.item.html_url))
-                    startActivity(intent)
-                }
-                is CombinedItem.Repository -> {
-                    val bundle = Bundle().apply {
-                        putString("repoName", item.item.full_name)
-                    }
-                    findNavController().navigate(R.id.action_searchFragment2_to_repListFragment, bundle)
-                }
-            }
         }
     }
 
@@ -100,13 +72,48 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 }
             }
             is Resource.Error -> {
-                binding.progressBar.visibility = View.GONE // Скрыть прогресс в случае ошибки
-                binding.searchEdit.isEnabled = true // Включить поле поиска
-                // Здесь можно вывести сообщение об ошибке
+                binding.progressBar.visibility = View.GONE
+                binding.searchEdit.isEnabled = true
             }
             is Resource.Loading -> {
-                binding.progressBar.visibility = View.VISIBLE // Показать прогресс
-                binding.searchEdit.isEnabled = false // Отключить поле ввода
+                binding.progressBar.visibility = View.VISIBLE
+                binding.searchEdit.isEnabled = false
+            }
+        }
+    }
+
+    private fun openRepositoryContent(owner: String, repo: String) {
+        val bundle = Bundle().apply {
+            putString("owner", owner)
+            putString("repo", repo)
+        }
+        findNavController().navigate(
+            R.id.action_searchFragment2_to_repositoryContentFragment,
+            bundle
+        )
+    }
+
+    private fun setupRecyclerView() {
+        combinedAdapter = CombinedAdapter()
+        binding.recyclerSearch.apply {
+            adapter = combinedAdapter
+            layoutManager = LinearLayoutManager(activity)
+        }
+
+        combinedAdapter.setOnItemClickListener { item ->
+            when (item) {
+                is CombinedItem.User -> {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.item.html_url))
+                    startActivity(intent)
+                }
+                is CombinedItem.Repository -> {
+                    val fullNameParts = item.item.full_name.split("/")
+                    if (fullNameParts.size == 2) {
+                        val owner = fullNameParts[0].trim()
+                        val repo = fullNameParts[1].trim()
+                        openRepositoryContent(owner, repo)
+                    }
+                }
             }
         }
     }
