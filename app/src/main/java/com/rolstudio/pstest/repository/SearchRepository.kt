@@ -1,6 +1,5 @@
 package com.rolstudio.pstest.repository
 
-import android.util.Log
 import com.rolstudio.pstest.api.RetrofitInstance
 import com.rolstudio.pstest.models.RepositoryContentItems
 import com.rolstudio.pstest.models.SearchItem
@@ -29,7 +28,7 @@ class SearchRepository {
                 if (repoResponse.isSuccessful) {
                     result[user] = repoResponse.body()?.items ?: emptyList()
                 } else {
-                    result[user] = emptyList() // Если ошибка, возвращаем пустой список репозиториев
+                    result[user] = emptyList()
                 }
             }
 
@@ -44,7 +43,6 @@ class SearchRepository {
         repo: String,
         path: String?
     ): Response<List<RepositoryContentItems>> {
-        Log.d("SearchRepository", "Fetching contents for owner: $owner, repo: $repo, path: $path")
         return RetrofitInstance.api.getRepositoryContents(owner, repo, path)
     }
 }

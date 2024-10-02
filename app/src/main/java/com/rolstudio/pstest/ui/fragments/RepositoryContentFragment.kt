@@ -15,6 +15,7 @@ import com.rolstudio.pstest.databinding.FragmentRepositoryContentBinding
 import com.rolstudio.pstest.models.RepositoryContentItems
 import com.rolstudio.pstest.ui.MainActivity
 import com.rolstudio.pstest.ui.MainViewModel
+import com.rolstudio.pstest.util.Resource
 
 class RepositoryContentFragment : Fragment(R.layout.fragment_repository_content) {
 
@@ -36,21 +37,27 @@ class RepositoryContentFragment : Fragment(R.layout.fragment_repository_content)
         setupRecyclerView()
         loadContents(owner, repo)
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (folderStack.isNotEmpty()) {
-                    folderStack.removeAt(folderStack.size - 1)
-                    val previousItem = folderStack.lastOrNull()
-                    if (previousItem != null) {
-                        loadContents(owner, repo, previousItem.path) // Передавайте правильные значения
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (folderStack.isNotEmpty()) {
+                        folderStack.removeAt(folderStack.size - 1)
+                        val previousItem = folderStack.lastOrNull()
+                        if (previousItem != null) {
+                            loadContents(
+                                owner,
+                                repo,
+                                previousItem.path
+                            )
+                        } else {
+                            findNavController().popBackStack()
+                        }
                     } else {
                         findNavController().popBackStack()
                     }
-                } else {
-                    findNavController().popBackStack()
                 }
-            }
-        })
+            })
     }
 
     private fun setupRecyclerView() {
@@ -66,24 +73,40 @@ class RepositoryContentFragment : Fragment(R.layout.fragment_repository_content)
         mainViewModel.loadContents(owner, repo, path ?: "")
         mainViewModel.contents.observe(viewLifecycleOwner) { contents ->
             binding.progressBar.visibility = View.GONE
-            if (contents != null) {
-                val sortedContents = contents.sortedWith(
-                    compareBy<RepositoryContentItems> {
-                        when (it.type) {
-                            "dir" -> 0
-                            "file" -> 1
-                            else -> 2
+            binding.errorMessage.visibility = View.GONE
+            binding.retryButton.visibility = View.GONE
+            when (contents) {
+                is Resource.Success<*> -> {
+                    val sortedContents = contents.sortedWith(
+                        compareBy<RepositoryContentItems> {
+                            when (it.type) {
+                                "dir" -> 0
+                                "file" -> 1
+                                else -> 2
+                            }
+                        }.thenBy {
+                            it.name
                         }
-                    }.thenBy {
-                        it.name
+                    )
+                    if (sortedContents.isNotEmpty()) {
+                        adapter.submitList(sortedContents)
+                    } else {
+                        Toast.makeText(context, "Содержимое пусто", Toast.LENGTH_SHORT).show()
                     }
-                )
-                if (sortedContents.isNotEmpty()) {
-                    adapter.submitList(sortedContents)
-                } else {
-                    Toast.makeText(context, "Содержимое тупое", Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Error<*> -> {
+                    binding.errorMessage.visibility = View.VISIBLE
+                    binding.retryButton.visibility = View.VISIBLE
+                    binding.errorMessage.text = contents.message ?: "Неизвестная ошибка"
+                }
+
+                is Resource.Loading<*> -> {
+                    binding.progressBar.visibility = View.VISIBLE
                 }
             }
+        }
+        binding.retryButton.setOnClickListener {
+            loadContents(owner, repo, path)
         }
     }
 
