@@ -35,21 +35,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         mainViewModel = (activity as MainActivity).mainViewModel
 
         setupRecyclerView()
+        searchButtonClick()
 
-        binding.searchButton.setOnClickListener {
-            val query = binding.searchEdit.query.toString().trim()
-            if (query.length > 3) {
-                job?.cancel()
-                job = MainScope().launch {
-                    delay(SEARCH_USERS_DELAY)
-                    binding.searchEdit.isEnabled =
-                        false
-                    mainViewModel.searchUsersAndRepositories(query)
-                }
-            } else {
-                combinedAdapter.submitList(emptyList())
-            }
-        }
         mainViewModel.searchUsers.observe(viewLifecycleOwner) { response ->
             handleUserSearchResponse(response)
         }
@@ -67,19 +54,28 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                         }
                     }
                     combinedAdapter.submitList(combinedItems)
-                    binding.progressBar.visibility = View.GONE // Скрыть прогресс
-                    binding.searchEdit.isEnabled = true // Включить поле поиска
+                    binding.progressBar.visibility = View.GONE
+                    binding.errorMessage.visibility = View.GONE
+                    binding.retryButton.visibility = View.GONE
+                    binding.searchEdit.isEnabled = true
                 }
             }
             is Resource.Error -> {
                 binding.progressBar.visibility = View.GONE
                 binding.searchEdit.isEnabled = true
+                binding.errorMessage.visibility = View.VISIBLE
+                binding.retryButton.visibility = View.VISIBLE
+                binding.errorMessage.text =
+                    response.message ?: "Неизвестная ошибка"
             }
             is Resource.Loading -> {
                 binding.progressBar.visibility = View.VISIBLE
                 binding.searchEdit.isEnabled = false
+                binding.errorMessage.visibility = View.GONE
+                binding.retryButton.visibility = View.GONE
             }
         }
+        retryButtonClick()
     }
 
     private fun openRepositoryContent(owner: String, repo: String) {
@@ -114,6 +110,38 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                         openRepositoryContent(owner, repo)
                     }
                 }
+            }
+        }
+    }
+
+    private fun retryButtonClick() {
+        binding.searchButton.setOnClickListener {
+            val query = binding.searchEdit.query.toString().trim()
+            if (query.length > 3) {
+                job?.cancel()
+                job = MainScope().launch {
+                    delay(SEARCH_USERS_DELAY)
+                    binding.searchEdit.isEnabled = false
+                    mainViewModel.searchUsersAndRepositories(query)
+                }
+            } else {
+                binding.errorMessage.text = "Введите более 3 символов для поиска"
+            }
+        }
+    }
+
+    private fun searchButtonClick() {
+        binding.searchButton.setOnClickListener {
+            val query = binding.searchEdit.query.toString().trim()
+            if (query.length > 3) {
+                job?.cancel()
+                job = MainScope().launch {
+                    delay(SEARCH_USERS_DELAY)
+                    binding.searchEdit.isEnabled = false
+                    mainViewModel.searchUsersAndRepositories(query)
+                }
+            } else {
+                binding.errorMessage.text = "Введите более 3 символов для поиска"
             }
         }
     }

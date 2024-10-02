@@ -89,7 +89,7 @@ class CombinedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 val repo = repoItem.item
                 holder.repoName.text = repo.name
                 holder.repoDescription.text = repo.description
-                    ?: "No Description" // Обработайте возможность отсутствия описания
+                    ?: "No Description"
                 holder.repoCountBranches.text = repo.forks_count.toString()
                 holder.itemView.setOnClickListener {
                     onItemClickListener?.let { click ->

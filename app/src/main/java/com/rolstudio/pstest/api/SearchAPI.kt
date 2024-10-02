@@ -27,6 +27,6 @@ interface SearchAPI {
     suspend fun getRepositoryContents(
         @Path("owner") owner: String,
         @Path("repo") repo: String,
-        @Path("path") path: String? // путь может быть пустым для корня
+        @Path("path") path: String?
     ): Response<List<RepositoryContentItems>>
 }
